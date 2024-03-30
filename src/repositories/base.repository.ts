@@ -43,11 +43,12 @@ export class BaseRepository<T extends Document> {
 
     public async findOneWithPopulate(
         condition: any,
-        populate: any,
+        populateField: string,
+        selectFields: string[] = []
     ): Promise<T> {
         return await this.model
             .findOne({ ...condition })
-            .populate(populate)
+            .populate(populateField, selectFields)
             .lean();
     }
 

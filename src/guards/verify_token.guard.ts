@@ -11,7 +11,7 @@ export class AuthGuard implements CanActivate {
         if (authHeader && authHeader.split(" ")[0] === "Bearer") {
             const token = authHeader.split(" ")[1]
             try {
-                const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY)
+                const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY) as jwt.JwtPayload
                 request['user'] = decoded
                 return true
             } catch (error) {

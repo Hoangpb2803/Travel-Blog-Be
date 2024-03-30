@@ -6,6 +6,7 @@ import { AuthModule } from './components/auth/auth.module';
 import { CloudinaryModule } from './components/cloudinary/cloudinary.module';
 import { BlogModule } from './components/blog/blog.module';
 import { UserModule } from './components/user/user.module';
+import { SavedBlogModule } from './components/saved-blog/saved-blog.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { UserModule } from './components/user/user.module';
     CloudinaryModule,
     BlogModule,
     UserModule,
+    SavedBlogModule,
   ],
   controllers: [AppController],
   providers: [AppService],

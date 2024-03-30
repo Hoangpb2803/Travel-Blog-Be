@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { ConflictException, HttpException, HttpStatus, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { BlogDto } from 'src/dtos/blog.dto';
 import { I_Response } from 'src/interfaces/response-data.interface';
 import { Blog } from 'src/models/blog.model';
@@ -24,6 +24,36 @@ export class BlogService {
         } catch (error) {
             console.log(">>> getting err when trying to get blogs ", error);
             throw new HttpException("Lỗi server", HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    async getBlogsWhenLogin(userId: string, page: number): Promise<I_Response<Blog>> {
+        try {
+            const blogs = await this.blogRepo.getBlogsWhenLogin(userId, page)
+            if (blogs[0]) {
+                return {
+                    statusCode: HttpStatus.OK,
+                    data: blogs
+                }
+            } throw new InternalServerErrorException
+        } catch (error) {
+            console.log(">>> getting err when trying to get blogs ", error);
+            throw new InternalServerErrorException
+        }
+    }
+
+    async getBlogDetail(_id: string): Promise<I_Response<Blog>> {
+        try {
+            const blog = await this.blogRepo.findOneWithPopulate({ _id }, 'user', ["_id", "firstName", "lastName", "avatar"])
+            if (blog) {
+                return {
+                    statusCode: HttpStatus.OK,
+                    data: blog
+                }
+            } throw new ConflictException
+        } catch (error) {
+            console.log(">>> getting err when trying to get blogs ", error);
+            throw new ConflictException
         }
     }
 

@@ -1,15 +1,17 @@
-import { ConflictException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { ConflictException, HttpException, HttpStatus, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { LoginDto } from 'src/dtos/login.dto';
 import { RegisterDto } from 'src/dtos/register.dto';
 import { User } from 'src/models/user.model';
 import { AuthRepository } from 'src/repositories/auth.repository';
 import * as jwt from 'jsonwebtoken';
 import { I_Response } from 'src/interfaces/response-data.interface';
+import { SavedBlogRepository } from 'src/repositories/saved-blog.repository';
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly authRepo: AuthRepository,
+        private readonly savedBlogRepo: SavedBlogRepository
     ) { }
 
     async login(data: LoginDto) {
@@ -30,14 +32,24 @@ export class AuthService {
         }
     }
 
+    private async createSavedBlog(userId: string) {
+        try {
+            await this.savedBlogRepo.create({ user: userId })
+        } catch (error) {
+            console.log(">>> auth-service: getting err when create new saved blog");
+            console.log(error);
+            throw new InternalServerErrorException
+        }
+    }
+
     async register(data: RegisterDto, avatar?: string): Promise<I_Response<User>> {
         try {
-            if (avatar) {
-                await this.authRepo.register(data, avatar)
+            const newUser = await this.authRepo.register(data, avatar)
+            if (newUser && newUser._id) {
+                await this.createSavedBlog(newUser._id)
                 return { statusCode: HttpStatus.OK }
             } else {
-                await this.authRepo.register(data)
-                return { statusCode: HttpStatus.OK }
+                throw new InternalServerErrorException
             }
         } catch (error) {
             console.log(">>> auth-service: getting err when create new user");
